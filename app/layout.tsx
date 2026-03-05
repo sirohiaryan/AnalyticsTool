@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
-import { SettingsProvider } from '@/components/providers/SettingsProvider';
 
 export const metadata: Metadata = {
   title: 'Creator Analytics',
@@ -14,14 +13,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" data-accent="purple">
+    <html lang="en" className="dark">
       <body>
-        <SettingsProvider>
-          <div className="min-h-screen md:grid md:grid-cols-[260px_1fr]">
-            <Sidebar />
-            <main className="p-5 md:p-8">{children}</main>
-          </div>
-        </SettingsProvider>
+        <div className="min-h-screen md:grid md:grid-cols-[260px_1fr]">
+          <Sidebar />
+          <main className="p-6 md:p-8">{children}</main>
+        </div>
       </body>
     </html>
   );
