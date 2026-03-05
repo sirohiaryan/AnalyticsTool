@@ -7,12 +7,6 @@ export type Episode = {
   completionRate: number;
   avgListenTime: number;
   revenue: number;
-  seriesId?: number;
-  seriesTitle?: string;
-  seasonNumber?: number;
-  episodeNumber?: number;
-  imdbRating?: number;
-  releaseYear?: number;
 };
 
 export type ListenerEvent = {
@@ -22,40 +16,6 @@ export type ListenerEvent = {
   eventType: 'play' | 'pause' | 'seek' | 'stop';
   timestamp: string;
   positionSec: number;
-};
-
-export type SeriesRecord = {
-  id: number;
-  title: string;
-  genre: string;
-  releaseYear: number;
-};
-
-export type EpisodeRecord = {
-  id: number;
-  seriesId: number;
-  season: number;
-  episodeNumber: number;
-  title: string;
-  runtimeMinutes: number;
-  imdbRating: number;
-};
-
-export type ListenerProfile = {
-  id: number;
-  country: string;
-  device: 'mobile' | 'web' | 'tv';
-  signupDate: string;
-};
-
-export type ListeningEventRow = {
-  id: string;
-  listenerId: number;
-  episodeId: number;
-  minute: number;
-  timestamp: string;
-  device: 'mobile' | 'web' | 'tv';
-  country: string;
 };
 
 export type Insight = {
@@ -86,51 +46,3 @@ export type DropOff = {
   minute: number;
   dropPercent: number;
 };
-
-export type DateRange = '7d' | '30d' | '90d' | 'custom';
-
-export type DailyGrowthPoint = {
-  date: string;
-  listeners: number;
-};
-
-export type CohortRetentionRow = {
-  cohort: string;
-  week1: number;
-  week2: number;
-  week3: number;
-};
-
-export type EpisodeTrend = {
-  episodeId: number;
-  wowGrowthPct: number;
-  retentionDelta: number;
-};
-
-export type GenreAggregate = {
-  genre: string;
-  avgCompletion: number;
-  totalListeners: number;
-};
-
-export type AudienceBreakdown = {
-  country: Record<string, number>;
-  device: Record<string, number>;
-  platform: Record<string, number>;
-};
-
-export type SeriesLeaderboardRow = {
-  seriesTitle: string;
-  completionRate: number;
-  totalListeners: number;
-};
-
-export type FeatureFlags = {
-  cohortAnalysis: boolean;
-  abTestingInsights: boolean;
-  revenueForecasting: boolean;
-};
-
-export type AccentColor = 'purple' | 'blue' | 'emerald';
-
-export type ThemeMode = 'dark' | 'light';

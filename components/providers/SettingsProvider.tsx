@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { AccentColor, DateRange, FeatureFlags, ThemeMode } from '@/lib/types';
 
-type ProviderMode = 'mock' | 'dataset' | 'supabase';
+type ProviderMode = 'mock' | 'supabase';
 
 type CustomRange = { start: string; end: string };
 
@@ -41,7 +41,7 @@ const getStored = <T,>(key: string, fallback: T): T => {
 };
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [providerMode, setProviderMode] = useState<ProviderMode>('dataset');
+  const [providerMode, setProviderMode] = useState<ProviderMode>('mock');
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const [accentColor, setAccentColor] = useState<AccentColor>('purple');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
@@ -49,7 +49,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [featureFlags, setFeatureFlags] = useState<FeatureFlags>(defaultFlags);
 
   useEffect(() => {
-    setProviderMode(getStored<ProviderMode>('settings.providerMode', 'dataset'));
+    setProviderMode(getStored<ProviderMode>('settings.providerMode', 'mock'));
     setThemeMode(getStored<ThemeMode>('settings.themeMode', 'dark'));
     setAccentColor(getStored<AccentColor>('settings.accentColor', 'purple'));
     setDateRange(getStored<DateRange>('settings.dateRange', '30d'));

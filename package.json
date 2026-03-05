@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "ingest": "node --loader ts-node/esm scripts/ingestDataset.ts",
-    "generate:events": "node --loader ts-node/esm scripts/generateEvents.ts"
+    "test": "jest"
   },
   "dependencies": {
     "next": "14.2.5",
@@ -32,7 +30,6 @@
     "postcss": "8.4.39",
     "tailwindcss": "3.4.7",
     "ts-jest": "29.2.5",
-    "typescript": "5.5.3",
-    "ts-node": "^10.9.2"
+    "typescript": "5.5.3"
   }
 }

@@ -3,63 +3,51 @@
  * 1) Implement SupabaseProvider.getEpisodes() using `supabase.from('episodes').select('*')`.
  * 2) Ensure retention arrays are materialized in SQL (or compute via event aggregation in analytics layer).
  * 3) Switch createDataProvider('supabase') and set NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY.
+ *
+ * Example SQL (Postgres/Supabase):
+ * create table episodes (
+ *   id bigint primary key generated always as identity,
+ *   title text not null,
+ *   duration_minutes int not null,
+ *   genre text not null,
+ *   retention int[] not null,
+ *   completion_rate numeric not null,
+ *   avg_listen_time numeric not null,
+ *   revenue numeric not null
+ * );
+ * create table listener_events (
+ *   id uuid primary key,
+ *   episode_id bigint not null references episodes(id),
+ *   user_id text,
+ *   event_type text not null check (event_type in ('play','pause','seek','stop')),
+ *   timestamp timestamptz not null,
+ *   position_sec int not null
+ * );
  */
-import {
-  getAllEpisodes,
-  getAudienceBreakdown,
-  getCohortRetention,
-  getEpisodeTrends,
-  getGenreAggregates,
-  getListenerEvents,
-  getListenerGrowthSeries,
-  getSeriesLeaderboard,
-  getSeriesTable,
-} from '@/lib/mockDataSource';
-import { DatasetDataProvider } from '@/lib/datasetDataProvider';
-import {
-  AudienceBreakdown,
-  CohortRetentionRow,
-  DailyGrowthPoint,
-  Episode,
-  EpisodeTrend,
-  GenreAggregate,
-  ListenerEvent,
-  SeriesLeaderboardRow,
-  SeriesRecord,
-} from '@/lib/types';
+import { getAllEpisodes, getListenerEvents } from '@/lib/mockDataSource';
+import { Episode, ListenerEvent } from '@/lib/types';
 
 export interface DataProvider {
   getEpisodes(): Promise<Episode[]>;
   getListenerEvents(): Promise<ListenerEvent[]>;
-  getListenerGrowth(): Promise<DailyGrowthPoint[]>;
-  getCohortRetention(): Promise<CohortRetentionRow[]>;
-  getEpisodeTrends(): Promise<EpisodeTrend[]>;
-  getGenreAggregates(): Promise<GenreAggregate[]>;
-  getAudienceBreakdown(): Promise<AudienceBreakdown>;
-  getSeriesLeaderboard(): Promise<SeriesLeaderboardRow[]>;
-  getSeries(): Promise<SeriesRecord[]>;
 }
 
 class MockDataProvider implements DataProvider {
-  getEpisodes(): Promise<Episode[]> { return getAllEpisodes(); }
-  getListenerEvents(): Promise<ListenerEvent[]> { return getListenerEvents(); }
-  getListenerGrowth(): Promise<DailyGrowthPoint[]> { return getListenerGrowthSeries(); }
-  getCohortRetention(): Promise<CohortRetentionRow[]> { return getCohortRetention(); }
-  getEpisodeTrends(): Promise<EpisodeTrend[]> { return getEpisodeTrends(); }
-  getGenreAggregates(): Promise<GenreAggregate[]> { return getGenreAggregates(); }
-  getAudienceBreakdown(): Promise<AudienceBreakdown> { return getAudienceBreakdown(); }
-  getSeriesLeaderboard(): Promise<SeriesLeaderboardRow[]> { return getSeriesLeaderboard(); }
-  getSeries(): Promise<SeriesRecord[]> { return getSeriesTable(); }
+  getEpisodes(): Promise<Episode[]> {
+    return getAllEpisodes();
+  }
+
+  getListenerEvents(): Promise<ListenerEvent[]> {
+    return getListenerEvents();
+  }
 }
 
-const providerSingletons: Partial<Record<'mock' | 'supabase' | 'rest' | 'dataset', DataProvider>> = {};
+const providerSingletons: Partial<Record<'mock' | 'supabase' | 'rest', DataProvider>> = {};
 
-export const createDataProvider = (
-  mode: 'mock' | 'supabase' | 'rest' | 'dataset' = 'dataset',
-): DataProvider => {
+export const createDataProvider = (mode: 'mock' | 'supabase' | 'rest' = 'mock'): DataProvider => {
   if (!providerSingletons[mode]) {
-    if (mode === 'dataset') providerSingletons[mode] = new DatasetDataProvider();
-    else providerSingletons[mode] = new MockDataProvider();
+    // Stub modes fallback to mock until concrete implementations are added.
+    providerSingletons[mode] = new MockDataProvider();
   }
   return providerSingletons[mode] as DataProvider;
 };
