@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import SkeletonCard from '@/components/SkeletonCard';
-import { useSettings } from '@/components/providers/SettingsProvider';
-import { filterSeriesByDateRange } from '@/lib/analytics';
 import CompletionChart from '@/components/CompletionChart';
 import Heatmap from '@/components/Heatmap';
 import InsightPanel from '@/components/InsightPanel';
@@ -21,21 +18,18 @@ import { createDataProvider } from '@/lib/dataProvider';
 import { Episode } from '@/lib/types';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
+const provider = createDataProvider('mock');
+
 export default function DashboardPage() {
-  const { providerMode, dateRange, customRange } = useSettings();
-  const provider = useMemo(() => createDataProvider(providerMode), [providerMode]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<number>(1);
-  const [growthLabel, setGrowthLabel] = useState('');
 
   useEffect(() => {
-    Promise.all([provider.getEpisodes(), provider.getListenerGrowth()]).then(([items, growth]) => {
+    provider.getEpisodes().then((items) => {
       setEpisodes(items);
       if (items[0]) setSelectedEpisodeId(items[0].id);
-      const filtered = filterSeriesByDateRange(growth, dateRange, customRange);
-      setGrowthLabel(`${filtered.length} points in selected range`);
     });
-  }, [provider, dateRange, customRange]);
+  }, []);
 
   const summary = useMemo(() => {
     const best = bestPerformingEpisode(episodes);
@@ -64,21 +58,11 @@ export default function DashboardPage() {
     [episodes],
   );
 
-
-  if (!episodes.length) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2">
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <section>
         <h2 className="text-2xl font-semibold text-purple-200">Creator Dashboard</h2>
-        <p className="text-slate-400">Snapshot of serialized audio performance and engagement trends. {growthLabel}</p>
+        <p className="text-slate-400">Snapshot of serialized audio performance and engagement trends.</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

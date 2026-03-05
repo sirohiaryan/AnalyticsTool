@@ -24,30 +24,12 @@
  *   position_sec int not null
  * );
  */
-import {
-  getAllEpisodes,
-  getCohortRetention,
-  getEpisodeTrends,
-  getGenreAggregates,
-  getListenerEvents,
-  getListenerGrowthSeries,
-} from '@/lib/mockDataSource';
-import {
-  CohortRetentionRow,
-  DailyGrowthPoint,
-  Episode,
-  EpisodeTrend,
-  GenreAggregate,
-  ListenerEvent,
-} from '@/lib/types';
+import { getAllEpisodes, getListenerEvents } from '@/lib/mockDataSource';
+import { Episode, ListenerEvent } from '@/lib/types';
 
 export interface DataProvider {
   getEpisodes(): Promise<Episode[]>;
   getListenerEvents(): Promise<ListenerEvent[]>;
-  getListenerGrowth(): Promise<DailyGrowthPoint[]>;
-  getCohortRetention(): Promise<CohortRetentionRow[]>;
-  getEpisodeTrends(): Promise<EpisodeTrend[]>;
-  getGenreAggregates(): Promise<GenreAggregate[]>;
 }
 
 class MockDataProvider implements DataProvider {
@@ -58,28 +40,13 @@ class MockDataProvider implements DataProvider {
   getListenerEvents(): Promise<ListenerEvent[]> {
     return getListenerEvents();
   }
-
-  getListenerGrowth(): Promise<DailyGrowthPoint[]> {
-    return getListenerGrowthSeries();
-  }
-
-  getCohortRetention(): Promise<CohortRetentionRow[]> {
-    return getCohortRetention();
-  }
-
-  getEpisodeTrends(): Promise<EpisodeTrend[]> {
-    return getEpisodeTrends();
-  }
-
-  getGenreAggregates(): Promise<GenreAggregate[]> {
-    return getGenreAggregates();
-  }
 }
 
 const providerSingletons: Partial<Record<'mock' | 'supabase' | 'rest', DataProvider>> = {};
 
 export const createDataProvider = (mode: 'mock' | 'supabase' | 'rest' = 'mock'): DataProvider => {
   if (!providerSingletons[mode]) {
+    // Stub modes fallback to mock until concrete implementations are added.
     providerSingletons[mode] = new MockDataProvider();
   }
   return providerSingletons[mode] as DataProvider;
