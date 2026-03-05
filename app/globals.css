@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 2 6 23;
+  --fg: 226 232 240;
+  --card: 15 23 42;
+  --accent-rgb: 139, 92, 246;
+}
+
+:root[data-theme='light'] {
+  --bg: 248 250 252;
+  --fg: 30 41 59;
+  --card: 241 245 249;
+}
+
+:root[data-accent='blue'] {
+  --accent-rgb: 59, 130, 246;
+}
+
+:root[data-accent='emerald'] {
+  --accent-rgb: 16, 185, 129;
+}
+
+body {
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+}
+
+.card {
+  @apply rounded-xl border border-slate-800/70 bg-slate-900/60 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl;
+  background-color: rgb(var(--card) / 0.7);
+}
