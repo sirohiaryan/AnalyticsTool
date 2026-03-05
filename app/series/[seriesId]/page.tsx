@@ -3,8 +3,7 @@ import { retentionFromEvents, detectDropPoints } from '@/lib/analytics/engine';
 
 export default async function SeriesDetailPage({ params }: { params: { seriesId: string } }) {
   const provider = createDataProvider();
-  const seriesId = params.seriesId;
-  const numericSeriesId = Number(seriesId);
+  const seriesId = Number(params.seriesId);
   const [series, episodes, events, metrics] = await Promise.all([
     provider.getSeries(),
     provider.getEpisodes(),
@@ -13,7 +12,7 @@ export default async function SeriesDetailPage({ params }: { params: { seriesId:
   ]);
 
   const current = series.find((s) => s.id === seriesId);
-  const list = episodes.filter((e) => e.series_id === numericSeriesId);
+  const list = episodes.filter((e) => e.series_id === seriesId);
   const selected = list[0];
   const curve = selected ? retentionFromEvents(events, selected) : [];
   const drops = detectDropPoints(curve);

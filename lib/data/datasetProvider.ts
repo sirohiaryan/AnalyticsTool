@@ -1,18 +1,18 @@
 import { Episode, Season, Series, ViewerEvent, ViewerMetric } from '@/lib/types';
 
 const series: Series[] = [
-  { id: '1', title: 'Breaking Bad', platform: 'Netflix', startYear: 2008, endYear: 2013, genres: ['Crime', 'Drama'], totalSeasons: 5, poster: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400' },
-  { id: '2', title: 'Game of Thrones', platform: 'HBO/Netflix (licensed)', startYear: 2011, endYear: 2019, genres: ['Fantasy', 'Drama'], totalSeasons: 8, poster: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400' },
-  { id: '3', title: 'Stranger Things', platform: 'Netflix', startYear: 2016, endYear: 2025, genres: ['Sci-Fi', 'Horror'], totalSeasons: 5, poster: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400' },
-  { id: '4', title: 'Black Mirror', platform: 'Netflix', startYear: 2011, endYear: 2024, genres: ['Sci-Fi', 'Anthology'], totalSeasons: 6, poster: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400' },
-  { id: '5', title: 'Money Heist', platform: 'Netflix', startYear: 2017, endYear: 2021, genres: ['Crime', 'Thriller'], totalSeasons: 5, poster: 'https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?w=400' },
+  { id: 1, title: 'Breaking Bad', platform: 'Netflix', start_year: 2008, end_year: 2013, genre: 'Crime, Drama', total_seasons: 5, poster: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400' },
+  { id: 2, title: 'Game of Thrones', platform: 'HBO/Netflix (licensed)', start_year: 2011, end_year: 2019, genre: 'Fantasy, Drama', total_seasons: 8, poster: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400' },
+  { id: 3, title: 'Stranger Things', platform: 'Netflix', start_year: 2016, end_year: 2025, genre: 'Sci-Fi, Horror', total_seasons: 5, poster: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400' },
+  { id: 4, title: 'Black Mirror', platform: 'Netflix', start_year: 2011, end_year: 2024, genre: 'Sci-Fi, Anthology', total_seasons: 6, poster: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400' },
+  { id: 5, title: 'Money Heist', platform: 'Netflix', start_year: 2017, end_year: 2021, genre: 'Crime, Thriller', total_seasons: 5, poster: 'https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?w=400' },
 ];
 
-const seasons: Season[] = series.flatMap((s) => Array.from({ length: Math.min(3, s.totalSeasons ?? 1) }).map((_, i) => ({
-  id: Number(s.id) * 10 + i + 1,
-  series_id: Number(s.id),
+const seasons: Season[] = series.flatMap((s) => Array.from({ length: Math.min(3, s.total_seasons) }).map((_, i) => ({
+  id: s.id * 10 + i + 1,
+  series_id: s.id,
   season_number: i + 1,
-  release_year: s.startYear + i,
+  release_year: s.start_year + i,
 })));
 
 const episodes: Episode[] = seasons.flatMap((season) =>

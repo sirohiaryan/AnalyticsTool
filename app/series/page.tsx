@@ -28,14 +28,14 @@ export default function SeriesPage() {
       <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search series..." className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((s) => {
-          const viewers = metrics.filter((m) => m.series_id === Number(s.id)).reduce((sum, m) => sum + m.viewers, 0);
+          const viewers = metrics.filter((m) => m.series_id === s.id).reduce((sum, m) => sum + m.viewers, 0);
           return (
             <Link key={s.id} href={`/series/${s.id}`} className="card p-4">
-              <Image src={s.poster ?? "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400"} alt={s.title} width={400} height={160} className="mb-3 h-40 w-full rounded-lg object-cover" />
+              <Image src={s.poster} alt={s.title} width={400} height={160} className="mb-3 h-40 w-full rounded-lg object-cover" />
               <h3 className="text-lg font-semibold">{s.title}</h3>
-              <p className="text-sm text-slate-400">{s.genres.join(', ')}</p>
+              <p className="text-sm text-slate-400">{s.genre}</p>
               <p className="mt-2 text-sm">Viewers: {formatNumber(viewers)}</p>
-              <p className="text-sm">Seasons: {s.totalSeasons ?? 0}</p>
+              <p className="text-sm">Seasons: {s.total_seasons}</p>
             </Link>
           );
         })}

@@ -5,12 +5,12 @@ import { Episode, Series, ViewerEvent, ViewerMetric } from '@/lib/types';
 
 export type AnalyticsBundle = {
   seriesList: Series[];
-  episodesBySeries: Record<string, Episode[]>;
+  episodesBySeries: Record<number, Episode[]>;
   viewerMetrics: ViewerMetric[];
   yearlyViewerStats: Array<{ year: number; viewers: number }>;
   retentionCurves: Record<number, Array<{ minute: number; retention: number }>>;
   growthData: Array<{ year: number; viewers: number }>;
-  completionRates: Record<string, Array<{ episode: string; completion: number }>>;
+  completionRates: Record<number, Array<{ episode: string; completion: number }>>;
   conversionFunnel: Array<{ stage: string; value: number }>;
   seriesPerformance: Array<{
     series: string;
@@ -30,25 +30,6 @@ const readJson = async <T,>(fileName: string): Promise<T | null> => {
     return null;
   }
 };
-
-const normalizeSeries = (entries: Series[]): Series[] => entries.map((series) => {
-  const legacy = series as unknown as {
-    id: number | string;
-    start_year?: number;
-    end_year?: number;
-    genre?: string;
-    total_seasons?: number;
-  };
-
-  return {
-    ...series,
-    id: String(series.id ?? legacy.id),
-    startYear: series.startYear ?? legacy.start_year ?? 2013,
-    endYear: series.endYear ?? legacy.end_year,
-    genres: series.genres ?? (legacy.genre ? legacy.genre.split(',').map((g) => g.trim()) : []),
-    totalSeasons: series.totalSeasons ?? legacy.total_seasons,
-  };
-});
 
 const retentionCurveForEpisode = (episode: Episode, metrics: ViewerMetric[]) => {
   const runtime = episode.runtime_minutes ?? episode.durationMinutes ?? 45;
@@ -74,14 +55,13 @@ export const loadAnalytics = async (): Promise<AnalyticsBundle> => {
     provider.getViewerEvents(),
   ]);
 
-  const rawSeriesList = (await readJson<Series[]>('series.json')) ?? providerSeries;
-  const seriesList = normalizeSeries(rawSeriesList);
+  const seriesList = (await readJson<Series[]>('series.json')) ?? providerSeries;
   const episodes = (await readJson<Episode[]>('episodes.json')) ?? providerEpisodes;
   const viewerMetrics = (await readJson<ViewerMetric[]>('viewer_metrics.json')) ?? providerMetrics;
   const viewEvents = (await readJson<ViewerEvent[]>('view_events.json')) ?? providerEvents;
 
-  const episodesBySeries = episodes.reduce<Record<string, Episode[]>>((acc, episode) => {
-    const seriesId = String(episode.series_id ?? 0);
+  const episodesBySeries = episodes.reduce<Record<number, Episode[]>>((acc, episode) => {
+    const seriesId = episode.series_id ?? 0;
     if (!acc[seriesId]) acc[seriesId] = [];
     acc[seriesId].push(episode);
     return acc;
@@ -101,8 +81,8 @@ export const loadAnalytics = async (): Promise<AnalyticsBundle> => {
     return acc;
   }, {});
 
-  const completionRates = Object.entries(episodesBySeries).reduce<Record<string, Array<{ episode: string; completion: number }>>>((acc, [seriesId, seriesEpisodes]) => {
-    acc[seriesId] = seriesEpisodes.map((episode) => {
+  const completionRates = Object.entries(episodesBySeries).reduce<Record<number, Array<{ episode: string; completion: number }>>>((acc, [seriesId, seriesEpisodes]) => {
+    acc[Number(seriesId)] = seriesEpisodes.map((episode) => {
       const rows = viewerMetrics.filter((m) => m.episode_id === episode.id);
       const completion = rows.length ? rows.reduce((sum, row) => sum + row.completion_rate, 0) / rows.length / 100 : 0;
       return {
@@ -128,7 +108,7 @@ export const loadAnalytics = async (): Promise<AnalyticsBundle> => {
   ];
 
   const seriesPerformance = seriesList.map((series) => {
-    const rows = viewerMetrics.filter((m) => m.series_id === Number(series.id));
+    const rows = viewerMetrics.filter((m) => m.series_id === series.id);
     const avgCompletion = rows.length ? rows.reduce((sum, row) => sum + row.completion_rate, 0) / rows.length : 0;
     const minYear = Math.min(...rows.map((r) => r.year));
     const maxYear = Math.max(...rows.map((r) => r.year));
