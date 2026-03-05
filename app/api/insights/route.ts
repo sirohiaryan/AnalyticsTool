@@ -1,14 +1,25 @@
 import { NextResponse } from 'next/server';
+import {
+  bestPerformingEpisode,
+  calculateAvgCompletion,
+  calculateAvgListenTime,
+  calculateTotalListeners,
+  generateInsights,
+} from '@/lib/analyticsEngine';
 import { createDataProvider } from '@/lib/dataProvider';
-import { summaryByYear } from '@/lib/analytics/engine';
+import { AnalyticsSummary } from '@/lib/types';
+
+const provider = createDataProvider('mock');
 
 export async function GET() {
-  const provider = createDataProvider();
-  const metrics = await provider.getViewerMetrics();
-  const summary = summaryByYear(metrics, 2024);
-  const insights = [
-    { id: 'i1', text: 'Completion is strongest for premium fantasy and thriller titles.', severity: 'info' as const },
-    { id: 'i2', text: 'Drop detected at early minutes for long-runtime episodes.', severity: 'warning' as const },
-  ];
-  return NextResponse.json({ insights, summary });
+  const [episodes] = await Promise.all([provider.getEpisodes(), provider.getListenerEvents()]);
+  const summary: AnalyticsSummary = {
+    totalListeners: calculateTotalListeners(episodes),
+    avgCompletion: calculateAvgCompletion(episodes),
+    avgListenTime: calculateAvgListenTime(episodes),
+    totalRevenue: episodes.reduce((sum, ep) => sum + ep.revenue, 0),
+    bestEpisodeId: bestPerformingEpisode(episodes).id,
+  };
+
+  return NextResponse.json({ insights: generateInsights(episodes), summary });
 }

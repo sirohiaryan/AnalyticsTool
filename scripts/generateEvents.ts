@@ -1,18 +1,39 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const episodes = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'data', 'episodes.json'), 'utf8')) as Array<{ id: number; series_id: number; runtime_minutes: number }>;
+const input = path.join(process.cwd(), 'data', 'ingested_series.json');
+const output = path.join(process.cwd(), 'data', 'generated_events.json');
 
-const events: Array<{ user_id: string; timestamp: string; series_id: number; episode_id: number; event_type: string; watch_position: number }> = [];
-for (let i = 1; i <= 50000; i += 1) {
-  const ep = episodes[i % episodes.length];
-  const start = new Date(Date.now() - i * 10000);
-  const watch = Math.max(1, Math.floor(ep.runtime_minutes * (0.25 + (i % 70) / 100)));
-  events.push({ user_id: `u-${i}`, timestamp: start.toISOString(), series_id: ep.series_id, episode_id: ep.id, event_type: 'start', watch_position: 0 });
-  if (watch > 5) events.push({ user_id: `u-${i}`, timestamp: new Date(start.getTime() + 60000 * 5).toISOString(), series_id: ep.series_id, episode_id: ep.id, event_type: 'pause', watch_position: 5 });
-  if (watch > 8) events.push({ user_id: `u-${i}`, timestamp: new Date(start.getTime() + 60000 * 8).toISOString(), series_id: ep.series_id, episode_id: ep.id, event_type: 'resume', watch_position: 8 });
-  events.push({ user_id: `u-${i}`, timestamp: new Date(start.getTime() + 60000 * watch).toISOString(), series_id: ep.series_id, episode_id: ep.id, event_type: watch > ep.runtime_minutes * 0.85 ? 'complete' : 'dropoff', watch_position: watch });
-}
+const episodes = JSON.parse(fs.readFileSync(input, 'utf8')) as Array<{
+  id: number;
+  runtime_minutes: number;
+}>;
 
-fs.writeFileSync(path.join(process.cwd(), 'data', 'view_events.json'), JSON.stringify(events, null, 2));
-console.log(`Generated ${events.length} events to /data/view_events.json`);
+const retentionTargets = [
+  { minute: 0, pct: 100 },
+  { minute: 2, pct: 90 },
+  { minute: 5, pct: 75 },
+  { minute: 10, pct: 60 },
+  { minute: 15, pct: 45 },
+  { minute: 20, pct: 30 },
+];
+
+const events = episodes.flatMap((episode, idx) => {
+  const listenerCount = 2000 + (idx % 8) * 1000;
+  return Array.from({ length: listenerCount }).flatMap((_, lIdx) => {
+    const basePct = retentionTargets[Math.min(retentionTargets.length - 1, lIdx % retentionTargets.length)].pct;
+    const stopMinute = Math.max(1, Math.floor((episode.runtime_minutes * basePct) / 100));
+    return Array.from({ length: stopMinute }).map((__, minute) => ({
+      id: `evt-${episode.id}-${lIdx}-${minute}`,
+      listener_id: lIdx + 1,
+      episode_id: episode.id,
+      minute,
+      timestamp: new Date(Date.now() - minute * 60000).toISOString(),
+      device: ['mobile', 'web', 'tv'][lIdx % 3],
+      country: ['India', 'US', 'Spain', 'Brazil', 'Germany'][lIdx % 5],
+    }));
+  });
+});
+
+fs.writeFileSync(output, JSON.stringify(events, null, 2));
+console.log(`Generated ${events.length} listening events at ${output}`);
